@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">RobotControl</string>
+    <string name="button_scan">Scan</string>
+    <string name="button_connect">Connect</string>
+    <string name="title_paired_devices">Paired Devises:</string>
+    <string name="button_refresh">Refresh</string>
+    <string name="device_id">Device not set, press Scan button</string>
+    <string name="coordinates">X=... Y=...</string>
+
+</resources>
