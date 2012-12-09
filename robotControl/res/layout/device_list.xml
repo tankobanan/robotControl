@@ -19,7 +19,7 @@
         android:stackFromBottom="true"
         android:layout_weight="1"
     />
-    <Button android:id="@+id/button_scan"
+    <Button android:id="@+id/button_refresh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/button_refresh"

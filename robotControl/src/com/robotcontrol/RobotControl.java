@@ -1,12 +1,11 @@
 package com.robotcontrol;
 
 import java.util.Date;
-import java.util.Set;
+
 
 import com.robotcontrol.R;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -16,22 +15,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class RobotControl extends Activity implements OnTouchListener {// Заставляем наш Activity класс воплощать интерфейс OnTouchListener
-	private EditText edtext;
-	private int REQUEST_ENABLE_BT;
-	private ArrayAdapter<String> mArrayAdapter;
-	private BluetoothDevice deviceSend;
+	private static final int REQUEST_CODE = 10;
 	private ConnectThread blueConnect;
-	private BluetoothDevice[] deviceArr;
 	Button btnConnect;
 	TransferData testTransfer;
 	byte[] commandByte = new byte[3];
@@ -48,9 +39,6 @@ public class RobotControl extends Activity implements OnTouchListener {// Застав
 		Resources res = getResources();
         Drawable shape = res. getDrawable(R.drawable.oval);
         
-        
-		
-		mArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_list, R.id.paired_devices);
 		btnConnect = (Button) findViewById(R.id.button2);
 		LinearLayout ll =(LinearLayout)this.findViewById(R.id.ll);//Достаем нужный View 
       //  ll.setOnTouchListener(this);// Устанавливаем данный класс в качестве слушателя MotionEvent'ов для нашего LinearLayout
@@ -60,56 +48,44 @@ public class RobotControl extends Activity implements OnTouchListener {// Застав
 	}
 
 	public void ScanButton_Click(View v) {
-		setContentView(R.layout.device_list);
-		ListView lv = (ListView) findViewById(R.id.paired_devices);
+		/*Intent ii = new Intent(this, DeviceListActivity.class);
+		ii.putExtra("Value1", "This value one for ActivityTwo ");
+		ii.putExtra("Value2", "This value two ActivityTwo");
+		// Set the request code to any code you like, you can identify the
+		// callback via this code
+		startActivityForResult(ii, REQUEST_CODE);*/
 		
-		BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		if (mBluetoothAdapter == null) {
-			edtext.setText("Device does not support Bluetooth");
-		} else if (!mBluetoothAdapter.isEnabled()) {
-			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+		Intent intent = new Intent(this, DeviceListActivity.class);
+		startActivityForResult(intent, REQUEST_CODE);
+	}
+	
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode == RESULT_CANCELED && requestCode == REQUEST_CODE) {
+			//Toast.makeText(this, "Canceled", Toast.LENGTH_SHORT).show();
+			if (data.hasExtra("returnKey3")) {
+				Toast.makeText(this, data.getExtras().getString("returnKey3"),
+						Toast.LENGTH_SHORT).show();
+			}
 		}
-
-		Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-		// If there are paired devices
-		if (pairedDevices.size() > 0) {
-			String[] names = new String[pairedDevices.size()];
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, names);
-			Integer i = 0;
-			deviceArr = new BluetoothDevice[pairedDevices.size()];
-			// Loop through paired devices
-		    for (BluetoothDevice device : pairedDevices) {
-		        // Add the name and address to an array adapter to show in a ListView
-				mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-				deviceArr[i] = device;
-		        names[i] = device.getName() + "\n" + device.getAddress();
-		        i++;
-		    }
-		    
-		    lv.setAdapter(adapter);   
-		    
-		    lv.setOnItemClickListener(new OnItemClickListener() {
-				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		        	deviceSend = deviceArr[position];
-		        	setContentView(R.layout.main);		        	
-		        	TextView displayText = (TextView) findViewById(R.id.textView1);
-		        	displayText.setText(deviceSend.getName() + " [" + deviceSend.getAddress() + "]");
-				}
-		      }); 
-		}	
-	}
+		
+		if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+			if (data.hasExtra("returnKey1")) {
+				Toast.makeText(this, data.getExtras().getString("returnKey1"),
+						Toast.LENGTH_SHORT).show();
+			}
+			if (data.hasExtra("returnKey2")) {
+				TextView displayText = (TextView) findViewById(R.id.textView1);
+	        	displayText.setText(data.getExtras().getString("returnKey2"));
+			}
+		}
+	}	
 	
 	
-	
-	
-
-	public void RefreshButton_Click(View v) {
-		ScanButton_Click(v);
-	}
 	
 	public void ConnectButton_Click(View v) {
-		blueConnect = new ConnectThread(deviceSend);
+		blueConnect = new ConnectThread(DeviceListActivity.deviceSend);
 		blueConnect.run();
 		
 		LinearLayout ll =(LinearLayout)this.findViewById(R.id.ll);//Достаем нужный View 
